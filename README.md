@@ -1,4 +1,4 @@
-# Jupyter Translate - Python script for translating jupyter notebook files
+# Jupyter Translate - Python script for translating Jupyter notebook files
 
 > NOTE: You might also want to take a loot at [nbTranslate](https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/nbextensions/nbTranslate/README.html)
 
