@@ -30,22 +30,29 @@ def translate_markdown(text, dest_language='pt'):
         
     return translate(text)
 
-def jupyter_translate(fname, language='pt', rename_source_file=True):
+def jupyter_translate(fname, language='pt', rename_source_file=True, print_translation=False):
     data_translated = json.load(open(fname, 'r'))
 
     for i in range(len(data_translated['cells'])):
         for j in range(len(data_translated['cells'][i]['source'])):
             if data_translated['cells'][i]['cell_type']=='markdown':
-                data_translated['cells'][i]['source'][j] = translate_markdown(data_translated['cells'][i]['source'][j], dest_language=language)
-            print(data_translated['cells'][i]['source'][j])
+                data_translated['cells'][i]['source'][j] = \
+                  translate_markdown(data_translated['cells'][i]['source'][j], dest_language=language)
+            if print_translation:
+                print(data_translated['cells'][i]['source'][j])
 
     if rename_source_file:
         fname_bk = f"{'.'.join(fname.split('.')[:-1])}_bk.ipynb" # index.ipynb -> index_bk.ipynb
+        
         os.rename(fname, fname_bk)
+        print(f'{fname} was renamed into {fname_bk}')
+        
         open(fname,'w').write(json.dumps(data_translated))
+        print(f'The {language} translation was stored in {fname}')
     else:
         dest_fname = f"{'.'.join(fname.split('.')[:-1])}_{language}.ipynb" # any.name.ipynb -> any.name_pt.ipynb
         open(dest_fname,'w').write(json.dumps(data_translated))
+        print(f'The {language} translation was stored in {dest_fname}')
 
 if __name__ == '__main__':
     fire.Fire(jupyter_translate)
