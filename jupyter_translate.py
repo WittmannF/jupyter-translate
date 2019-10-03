@@ -30,13 +30,13 @@ def translate_markdown(text, dest_language='pt'):
         
     return translate(text)
 
-def jupyter_translate(fname, rename_source_file=True):
+def jupyter_translate(fname, language='pt', rename_source_file=True):
     data_translated = json.load(open(fname, 'r'))
 
     for i in range(len(data_translated['cells'])):
         for j in range(len(data_translated['cells'][i]['source'])):
             if data_translated['cells'][i]['cell_type']=='markdown':
-                data_translated['cells'][i]['source'][j] = translate_markdown(data_translated['cells'][i]['source'][j])
+                data_translated['cells'][i]['source'][j] = translate_markdown(data_translated['cells'][i]['source'][j], dest_language=language)
             print(data_translated['cells'][i]['source'][j])
 
     if rename_source_file:
