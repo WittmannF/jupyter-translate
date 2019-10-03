@@ -40,7 +40,8 @@ def jupyter_translate(fname, rename_source_file=True):
             print(data_translated['cells'][i]['source'][j])
 
     if rename_source_file:
-        os.rename(fname, fname+'.bk')
+        fname_bk = f"{'.'.join(fname.split('.')[:-1])}_bk.ipynb" # index.ipynb -> index_bk.ipynb
+        os.rename(fname, fname_bk)
         open(fname,'w').write(json.dumps(data_translated))
     else:
         dest_fname = f"{'.'.join(fname.split('.')[:-1])}_{language}.ipynb" # any.name.ipynb -> any.name_pt.ipynb
