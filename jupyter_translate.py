@@ -1,21 +1,58 @@
 import json, fire, os
 from googletrans import Translator
 
+#export
+import json, re
+from googletrans import Translator
+
 def translate_markdown(text, dest_language='pt'):
+    # Regex expressions
+    MD_CODE_REGEX='```[a-z]*\n[\s\S]*?\n```'
+    CODE_REPLACEMENT_KW = 'xx_markdown_code_xx'
+
+    MD_LINK_REGEX="\[[^)]+\)"
+    LINK_REPLACEMENT_KW = 'xx_markdown_link_xx'
+    
     # Markdown tags
     END_LINE='\n'
     IMG_PREFIX='!['
     HEADERS=['### ', '###', '## ', '##', '# ', '#'] # Should be from this order (bigger to smaller)
+
+     # Inner function to replace tags from text from a source list        
+    def replace_from_list(tag, text, replacement_list):
+        list_to_gen = lambda: [(yield x) for x in replacement_list]
+        replacement_gen = list_to_gen()
+        return re.sub(tag, lambda x: next(replacement_gen), text) 
 
     # Create an instance of Tranlator
     translator = Translator()
 
     # Inner function for translation
     def translate(text):
-        return translator.translate(text, dest=dest_language).text
+        # Get all markdown links
+        md_links = re.findall(MD_LINK_REGEX, text)
+
+        # Get all markdown code blocks
+        md_codes = re.findall(MD_CODE_REGEX, text)
+
+        # Replace markdown links in text to markdown_link
+        text = re.sub(MD_LINK_REGEX, LINK_REPLACEMENT_KW, text)
+
+        # Replace links in markdown to tag markdown_link
+        text = re.sub(MD_CODE_REGEX, CODE_REPLACEMENT_KW, text)
+
+        # Translate text
+        text = translator.translate(text, dest=dest_language).text
+
+        # Replace tags to original link tags
+        text = replace_from_list(LINK_REPLACEMENT_KW, text, md_links)
+        
+        # Replace code tags
+        text = replace_from_list(CODE_REPLACEMENT_KW, text, md_codes)
+
+        return text    
 
     # Check if there are special Markdown tags
-    # TODO: Implent `code tag` and [link tag]() checker
     if len(text)>=2:
         if text[-1:]==END_LINE:
             return translate(text)+'\n'
@@ -30,14 +67,20 @@ def translate_markdown(text, dest_language='pt'):
         
     return translate(text)
 
-def jupyter_translate(fname, language='pt', rename_source_file=True, print_translation=False):
+#export
+def jupyter_translate(fname, language='pt', rename_source_file=False, print_translation=False):
     data_translated = json.load(open(fname, 'r'))
+    
+    skip_row=False
+    for i, cell in enumerate(data_translated['cells']):
+        for j, source in enumerate(cell['source']):
+            if cell['cell_type']=='markdown':
+                if source[:3]=='```':
+                    skip_row = not skip_row # Invert flag until I find next code block
 
-    for i in range(len(data_translated['cells'])):
-        for j in range(len(data_translated['cells'][i]['source'])):
-            if data_translated['cells'][i]['cell_type']=='markdown':
-                data_translated['cells'][i]['source'][j] = \
-                  translate_markdown(data_translated['cells'][i]['source'][j], dest_language=language)
+                if not skip_row:
+                    data_translated['cells'][i]['source'][j] = \
+                        translate_markdown(source, dest_language=language)
             if print_translation:
                 print(data_translated['cells'][i]['source'][j])
 
@@ -48,11 +91,11 @@ def jupyter_translate(fname, language='pt', rename_source_file=True, print_trans
         print(f'{fname} was renamed into {fname_bk}')
         
         open(fname,'w').write(json.dumps(data_translated))
-        print(f'The {language} translation was stored in {fname}')
+        print(f'The {language} translation has been saved as {fname}')
     else:
         dest_fname = f"{'.'.join(fname.split('.')[:-1])}_{language}.ipynb" # any.name.ipynb -> any.name_pt.ipynb
         open(dest_fname,'w').write(json.dumps(data_translated))
-        print(f'The {language} translation was stored in {dest_fname}')
+        print(f'The {language} translation has been saved as {dest_fname}')
 
 if __name__ == '__main__':
     fire.Fire(jupyter_translate)
