@@ -12,17 +12,17 @@ def translate_markdown(text, dest_language='pt'):
 
     MD_LINK_REGEX="\[[^)]+\)"
     LINK_REPLACEMENT_KW = 'xx_markdown_link_xx'
-    
+
     # Markdown tags
     END_LINE='\n'
     IMG_PREFIX='!['
     HEADERS=['### ', '###', '## ', '##', '# ', '#'] # Should be from this order (bigger to smaller)
 
-     # Inner function to replace tags from text from a source list        
+     # Inner function to replace tags from text from a source list
     def replace_from_list(tag, text, replacement_list):
         list_to_gen = lambda: [(yield x) for x in replacement_list]
         replacement_gen = list_to_gen()
-        return re.sub(tag, lambda x: next(replacement_gen), text) 
+        return re.sub(tag, lambda x: next(replacement_gen), text)
 
     # Create an instance of Tranlator
     translator = Translator()
@@ -45,12 +45,12 @@ def translate_markdown(text, dest_language='pt'):
         text = translator.translate(text, dest=dest_language).text
 
         # Replace tags to original link tags
-        text = replace_from_list(LINK_REPLACEMENT_KW, text, md_links)
-        
-        # Replace code tags
-        text = replace_from_list(CODE_REPLACEMENT_KW, text, md_codes)
+        text = replace_from_list('[Xx]'+LINK_REPLACEMENT_KW[1:], text, md_links)
 
-        return text    
+        # Replace code tags
+        text = replace_from_list('[Xx]'+CODE_REPLACEMENT_KW[1:], text, md_codes)
+
+        return text
 
     # Check if there are special Markdown tags
     if len(text)>=2:
@@ -64,17 +64,17 @@ def translate_markdown(text, dest_language='pt'):
             len_header=len(header)
             if text[:len_header]==header:
                 return header + translate(text[len_header:])
-        
+
     return translate(text)
 
 #export
 def jupyter_translate(fname, language='pt', rename_source_file=False, print_translation=False):
     """
     TODO:
-    add dest_path: Destination folder in order to save the translated files. 
+    add dest_path: Destination folder in order to save the translated files.
     """
     data_translated = json.load(open(fname, 'r'))
-    
+
     skip_row=False
     for i, cell in enumerate(data_translated['cells']):
         for j, source in enumerate(cell['source']):
@@ -90,16 +90,28 @@ def jupyter_translate(fname, language='pt', rename_source_file=False, print_tran
 
     if rename_source_file:
         fname_bk = f"{'.'.join(fname.split('.')[:-1])}_bk.ipynb" # index.ipynb -> index_bk.ipynb
-        
+
         os.rename(fname, fname_bk)
         print(f'{fname} has been renamed as {fname_bk}')
-        
+
         open(fname,'w').write(json.dumps(data_translated))
         print(f'The {language} translation has been saved as {fname}')
     else:
         dest_fname = f"{'.'.join(fname.split('.')[:-1])}_{language}.ipynb" # any.name.ipynb -> any.name_pt.ipynb
         open(dest_fname,'w').write(json.dumps(data_translated))
         print(f'The {language} translation has been saved as {dest_fname}')
+
+def markdown_translator(input_fpath, output_fpath, input_name_suffix=''):
+    with open(input_fpath,'r') as f:
+        content = f.readlines()
+    content = ''.join(content)
+    content_translated = translate_markdown(content)
+    if input_name_suffix!='':
+        new_input_name=f"{'.'.join(input_fpath.split('.')[:-1])}{input_name_suffix}.md"
+        os.rename(input_fpath, new_input_name)
+    with open(output_fpath, 'w') as f:
+        f.write(content_translated)
+
 
 if __name__ == '__main__':
     fire.Fire(jupyter_translate)
