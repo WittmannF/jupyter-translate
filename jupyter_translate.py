@@ -69,6 +69,10 @@ def translate_markdown(text, dest_language='pt'):
 
 #export
 def jupyter_translate(fname, language='pt', rename_source_file=False, print_translation=False):
+    """
+    TODO:
+    add dest_path: Destination folder in order to save the translated files. 
+    """
     data_translated = json.load(open(fname, 'r'))
     
     skip_row=False
