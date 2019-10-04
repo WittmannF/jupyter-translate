@@ -88,7 +88,7 @@ def jupyter_translate(fname, language='pt', rename_source_file=False, print_tran
         fname_bk = f"{'.'.join(fname.split('.')[:-1])}_bk.ipynb" # index.ipynb -> index_bk.ipynb
         
         os.rename(fname, fname_bk)
-        print(f'{fname} was renamed into {fname_bk}')
+        print(f'{fname} has been renamed as {fname_bk}')
         
         open(fname,'w').write(json.dumps(data_translated))
         print(f'The {language} translation has been saved as {fname}')
