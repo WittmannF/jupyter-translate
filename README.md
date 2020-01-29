@@ -12,7 +12,7 @@ The original file is going to be renamed to `index_bk.ipynb` and the file named 
 
 There's also a script for automatically translate all .ipynb files from a folder and it's subfolders. Keep in mind that all .ipynb files are going to be renamed to `{file_name}_bk.ipynb`
 
-OBS: jupyter-tranlate uses [googletrans](https://py-googletrans.readthedocs.io/en/latest/) on its backend. `-language` can be any from the following dictionary:
+OBS: jupyter-translate uses [googletrans](https://py-googletrans.readthedocs.io/en/latest/) on its backend. `-language` can be any from the following dictionary:
 ```
 {'af': 'afrikaans',
  'sq': 'albanian',
