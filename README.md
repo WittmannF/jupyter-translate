@@ -5,7 +5,7 @@
 This script was created with the purpose of translating the FastAI documentation (which was implemented using notebooks) into Portuguese, but can also be used for a general purpose. Here's an example of usage:
 
 ```
-python jupyter_translate.py index.ipynb -language 'pt'
+python jupyter_translate.py index.ipynb --language 'pt'
 ```
 
 The original file is going to be renamed to `index_bk.ipynb` and the file named `index.ipynb` is going have the translated version. It was done this way in order to avoid having to rename all translated files later. 
