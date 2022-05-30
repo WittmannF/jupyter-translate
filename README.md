@@ -1,8 +1,5 @@
 # Jupyter Translate - Python script for translating Jupyter notebook files
 
-> NOTE: You might also want to take a look at [nbTranslate](https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/nbextensions/nbTranslate/README.html)
-(no longer maintained)
-
 This script was created with the purpose of translating the FastAI documentation (which was implemented using notebooks) into Portuguese, but can also be used for a general purpose. Here's an example of usage:
 
 ```
