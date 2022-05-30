@@ -9,9 +9,7 @@ This script was created with the purpose of translating the FastAI documentation
 python jupyter_translate.py index.ipynb --language 'pt'
 ```
 
-The original file is going to be renamed to `index_bk.ipynb` and the file named `index.ipynb` is going have the translated version. It was done this way in order to avoid having to rename all translated files later. 
-
-There's also a script for automatically translate all .ipynb files from a folder and it's subfolders. Keep in mind that all .ipynb files are going to be renamed to `{file_name}_bk.ipynb`
+A new file with the name `index_pt.ipynb` is going to be created. There's also a script for automatically translate all .ipynb files from a folder and it's subfolders.
 
 OBS: jupyter-translate uses [googletrans](https://py-googletrans.readthedocs.io/en/latest/) on its backend. `-language` can be any from the following dictionary:
 ```
