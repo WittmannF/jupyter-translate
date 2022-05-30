@@ -20,7 +20,7 @@ def translate_markdown(text, dest_language='pt'):
 
      # Inner function to replace tags from text from a source list
     def replace_from_list(tag, text, replacement_list):
-        list_to_gen = lambda: [(yield x) for x in replacement_list]
+        list_to_gen = lambda: [(x) for x in replacement_list]
         replacement_gen = list_to_gen()
         return re.sub(tag, lambda x: next(replacement_gen), text)
 
