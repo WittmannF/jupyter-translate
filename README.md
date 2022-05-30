@@ -1,6 +1,7 @@
 # Jupyter Translate - Python script for translating Jupyter notebook files
 
-> NOTE: You might also want to take a loot at [nbTranslate](https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/nbextensions/nbTranslate/README.html)
+> NOTE: You might also want to take a look at [nbTranslate](https://jupyter-contrib-nbextensions.readthedocs.io/en/latest/nbextensions/nbTranslate/README.html)
+(no longer maintained)
 
 This script was created with the purpose of translating the FastAI documentation (which was implemented using notebooks) into Portuguese, but can also be used for a general purpose. Here's an example of usage:
 
@@ -122,3 +123,12 @@ OBS: jupyter-translate uses [googletrans](https://py-googletrans.readthedocs.io/
  'he': 'Hebrew'}
  ```
 
+## Implementation notes
+To set up a working conda environment to use this tool, you must install `fire` with conda-forge
+and a newer version of `googletrans` with pip. Like this:
+```
+conda env create --file environment.yml
+conda activate jtranslate
+pip install googletrans==3.1.0a0
+```
+Copy and execute each line one by one -- not as a block.
