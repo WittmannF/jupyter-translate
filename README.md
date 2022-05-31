@@ -125,10 +125,10 @@ OBS: jupyter-translate uses [googletrans](https://py-googletrans.readthedocs.io/
 
 ## Implementation notes
 To set up a working conda environment to use this tool, you must install `fire` with conda-forge
-and a newer version of `googletrans` with pip. Like this:
+and a newer version of `googletrans` with pip.  You can do that with the included environment file. 
+In your terminal, enter:
 ```
 conda env create --file environment.yml
 conda activate jtranslate
-pip install googletrans==3.1.0a0
 ```
 Copy and execute each line one by one -- not as a block.
