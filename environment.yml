@@ -9,3 +9,6 @@ dependencies:
   - matplotlib
   - jupyter
   - fire
+  - pip
+  - pip:
+    - googletrans==3.1.0a0
