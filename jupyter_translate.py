@@ -1,9 +1,6 @@
-import json, fire, os
+import json, fire, os, re
 from googletrans import Translator
 
-#export
-import json, re
-from googletrans import Translator
 
 def translate_markdown(text, dest_language='pt'):
     # Regex expressions
