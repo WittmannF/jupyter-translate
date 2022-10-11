@@ -80,8 +80,10 @@ def jupyter_translate(fname, language='pt', rename_source_file=False, print_tran
                     skip_row = not skip_row # Invert flag until I find next code block
 
                 if not skip_row:
-                    data_translated['cells'][i]['source'][j] = \
-                        translate_markdown(source, dest_language=language)
+                    if source not in ['```\n', '```', '\n'] and source[:4] != '<img':  # Don't translate cause
+                    # of: 1. ``` -> ëëë 2. '\n' disappeared 3. image's links damaged
+                        data_translated['cells'][i]['source'][j] = \
+                            translate_markdown(source, dest_language=language)
             if print_translation:
                 print(data_translated['cells'][i]['source'][j])
 
