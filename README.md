@@ -1,6 +1,6 @@
 # Jupyter Translate - Python script for translating Jupyter notebook files
 
-This script was created with the purpose of translating the FastAI documentation (which was implemented using notebooks) into Portuguese, but can also be used for a general purpose. Here's an example of usage:
+This script was created to serve as a general-purpose translator of jupyter notebooks. Here's an example of usage:
 
 ```
 python jupyter_translate.py index.ipynb --language 'pt'
