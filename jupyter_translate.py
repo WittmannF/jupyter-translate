@@ -4,10 +4,10 @@ from googletrans import Translator
 
 def translate_markdown(text, dest_language='pt'):
     # Regex expressions
-    MD_CODE_REGEX='```[a-z]*\n[\s\S]*?\n```'
-    CODE_REPLACEMENT_KW = 'xx_markdown_code_xx'
-
-    MD_LINK_REGEX="\[[^)]+\)"
+    MD_CODE_REGEX = r'```[a-z]*\n[\s\S]*?\n```'
+    CODE_REPLACEMENT_KW = r'xx_markdown_code_xx'
+    
+    MD_LINK_REGEX = r'\[[^)]+\)'
     LINK_REPLACEMENT_KW = 'xx_markdown_link_xx'
 
     # Markdown tags
@@ -70,7 +70,8 @@ def jupyter_translate(fname, language='pt', rename_source_file=False, print_tran
     TODO:
     add dest_path: Destination folder in order to save the translated files.
     """
-    data_translated = json.load(open(fname, 'r'))
+    with open(fname, 'r', encoding='utf-8') as file:
+        data_translated = json.load(file)
 
     skip_row=False
     for i, cell in enumerate(data_translated['cells']):
@@ -101,16 +102,15 @@ def jupyter_translate(fname, language='pt', rename_source_file=False, print_tran
         print(f'The {language} translation has been saved as {dest_fname}')
 
 def markdown_translator(input_fpath, output_fpath, input_name_suffix=''):
-    with open(input_fpath,'r') as f:
+    with open(input_fpath, 'r', encoding='utf-8') as f:
         content = f.readlines()
     content = ''.join(content)
     content_translated = translate_markdown(content)
-    if input_name_suffix!='':
-        new_input_name=f"{'.'.join(input_fpath.split('.')[:-1])}{input_name_suffix}.md"
+    if input_name_suffix != '':
+        new_input_name = f"{'.'.join(input_fpath.split('.')[:-1])}{input_name_suffix}.md"
         os.rename(input_fpath, new_input_name)
-    with open(output_fpath, 'w') as f:
+    with open(output_fpath, 'w', encoding='utf-8') as f:
         f.write(content_translated)
-
 
 if __name__ == '__main__':
     fire.Fire(jupyter_translate)
