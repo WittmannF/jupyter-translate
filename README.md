@@ -5,11 +5,11 @@
 This script was created as a general-purpose translator for Jupyter notebooks, translating from English to any other language. Here’s an example of how to use it:
 
 ```
-python jupyter_translate.py index.ipynb --language 'pt'
+python jupyter_translate.py test_Notebook_en.ipynb --language 'pt'
 ```
-A new file named `index_pt.ipynb` will be created (or the code of the language you decided to use). There is also a script for automatically translating all .ipynb files in a folder and its subfolders. Additionally, you can use a version of the script that converts Portuguese notebooks to English:
+A new file named `test_Notebook_en_pt.ipynb` will be created (or the code of the language you decided to use). There is also a script for automatically translating all .ipynb files in a folder and its subfolders. Additionally, you can use a version of the script that converts Portuguese notebooks to English:
 ```
-python jupyter_translate_pt2en.py index.ipynb
+python jupyter_translate_pt2en.py test_Notebook_pt.ipynb
 ```
 The program translates markdown content, comments in code cells, and messages formatted in  `print(f" ... ")`. 
 

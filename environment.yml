@@ -5,8 +5,11 @@ channels:
 dependencies:
   - python
   - tqdm
+  - numpy
+  - scipy
+  - matplotlib
+  - jupyter
   - fire
-  - pyyaml  # Added to handle YAML files in the script
   - pip
   - pip:
     - googletrans==3.1.0a0
