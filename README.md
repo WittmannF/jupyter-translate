@@ -52,6 +52,6 @@ To set up a working Conda environment to use this tool, you must install `fire` 
 conda env create --file environment.yml
 conda activate jtranslate
 ```
-**Note**: Copy and execute each line one by one -- not as a block.
+**Note**: Copy and execute each line one by one—do not run them as a block. **Caution**: There is an incompatibility between `httpx`, which is used by `googletrans`, and `jupyterlab`. It is recommended to use jupyter notebook instead.
 
 If you have any question or suggestion, use the *pull request* or discussion option in github.
