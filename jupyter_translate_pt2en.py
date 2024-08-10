@@ -1,3 +1,8 @@
+"""
+History:
+- Aug 2024: Updated to include translation of comments in code cells and translation statistics, with a progress bar. (andrebelem@id.uff.br)
+"""
+
 import json, fire, os, re
 from googletrans import Translator
 from tqdm import tqdm  # For progress bar
