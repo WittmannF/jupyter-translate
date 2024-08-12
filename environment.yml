@@ -5,6 +5,7 @@ channels:
 dependencies:
   - python
   - tqdm
+  - deep-translator
   - numpy
   - scipy
   - matplotlib
