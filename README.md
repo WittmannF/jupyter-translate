@@ -23,6 +23,7 @@ python jupyter_translate.py test_Notebook_en.ipynb --target pt --translator='mym
 Currently supported translators are:
 * google (default)
 * mymemory
+ <br> 
 **Caution:** If you are using `mymemory` as backend translator, the language codes are different. The script will show you the codes. Make sure to specify the correct `--source` and `--target` language codes supported by the selected translator. The --language option can be set to any of the following (codes from default `googletrans`:
 
 | Code   | Language              | Code   | Language               | Code   | Language             | Code   | Language          |
