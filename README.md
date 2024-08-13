@@ -2,14 +2,19 @@
 
 [version 2024]
 
-This script was created as a general-purpose translator for Jupyter notebooks, translating across different languages (the default source language is English). Here’s an example of how to use it:
+This script was created as a general-purpose translator for Jupyter notebooks, translating across different languages (the default source language is English). Install it with:
+```
+pip install jupyter_translate
+```
+
+After installed, you can use it but running the following command in the terminal:
 
 ```
-python jupyter_translate.py test_Notebook_en.ipynb --target pt
+jupyter_translate test_Notebook_en.ipynb --target pt
 ```
 A new file named `test_Notebook_en_pt.ipynb` will be created (or the code of the language you decided to use). There is also a script for automatically translating all .ipynb files in a folder and its subfolders. Additionally, you can use a version of the script that converts from/to any language, like:
 ```
-python jupyter_translate.py test_Notebook_pt.ipynb --source pt --target en
+jupyter_translate test_Notebook_pt.ipynb --source pt --target en
 ```
 The program translates markdown content, comments in code cells, and messages formatted in  `print(f" ... ")`. 
 
@@ -18,7 +23,7 @@ The program translates markdown content, comments in code cells, and messages fo
 By default, jupyter-translate uses [googletrans](https://py-googletrans.readthedocs.io/en/latest/) on its backend. However, you can specify a different translator using the --translator option. Here’s how to use it:
 
 ```
-python jupyter_translate.py test_Notebook_en.ipynb --target pt --translator='mymemory'
+jupyter_translate test_Notebook_en.ipynb --target pt --translator='mymemory'
 ```
 Currently supported translators are:
 * google (default)
@@ -61,18 +66,18 @@ Currently supported translators are:
 `--delay`:<br>
 The delay in seconds between retries in case of connection issues. The default is 10 seconds. Adjusting this can help if you're facing connectivity issues, especially behind firewalls.
 ```
-python jupyter_translate.py my_notebook.ipynb --target es --delay=15
+jupyter_translate my_notebook.ipynb --target es --delay=15
 ```
 
 `--rename`:<br>
 If specified, this option will rename the original notebook file after the translation is complete. This can be useful if you want to keep the translated version as the primary file.
 ```
-python jupyter_translate.py my_notebook.ipynb --target es --rename
+jupyter_translate my_notebook.ipynb --target es --rename
 ```
 `--print`:<br>
 Use this option if you want to print the translations directly to the console as they happen.
 ```
-python jupyter_translate.py my_notebook.ipynb --target es --print
+jupyter_translate my_notebook.ipynb --target es --print
 ```
 
 ## Implementation notes:
@@ -82,6 +87,16 @@ To set up a working Conda environment to use this tool, you must install a newer
 conda env create --file environment.yml
 conda activate jtranslate
 ```
+
+You can also reset the environment by running:
+```
+conda deactivate
+conda remove --name jtranslate --all
+conda env create -f environment.yml
+conda activate jtranslate
+```
+
+
 **Note:** Copy and execute each line one by one—do not run them as a block. **Caution:** The googletrans API, as used by deep-translator, may face connectivity issues if you're behind a firewall. To improve accessibility in such environments, consider using the --delay option to introduce a pause between retries.
 
 If you have any question or suggestion, use the *pull request* or discussion option in github.
