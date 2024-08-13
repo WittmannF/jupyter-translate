@@ -1,4 +1,7 @@
 fire
 deep-translator
-googletrans
+googletrans==3.1.0a0
 tqdm
+numpy
+scipy
+matplotlib

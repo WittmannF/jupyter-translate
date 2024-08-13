@@ -194,7 +194,7 @@ def jupyter_translate(fname, src_language, dest_language, delay, translator_name
         print(f'The {dest_language} translation has been saved as {dest_fname}')
 
 # Main function to parse arguments and run the translation
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(description="Translate a Jupyter Notebook from one language to another.")
     parser.add_argument('fname', help="Path to the Jupyter Notebook file")
     parser.add_argument('--source', default='en', help="Source language code (default: en)")
@@ -216,7 +216,7 @@ if __name__ == '__main__':
         print_translation=args.print_translation
     )
 
-
-
+if __name__ == '__main__':
+    main()
 
 

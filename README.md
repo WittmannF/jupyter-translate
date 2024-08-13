@@ -2,14 +2,24 @@
 
 [version 2024]
 
-This script was created as a general-purpose translator for Jupyter notebooks, translating across different languages (the default source language is English). Here’s an example of how to use it:
+This script was created as a general-purpose translator for Jupyter notebooks, translating across different languages (the default source language is English). Install it with:
+```
+pip install jupyter_translate
+```
+or
 
 ```
-python jupyter_translate.py test_Notebook_en.ipynb --target pt
+pip install .
+```
+
+After installed, you can use it but running the following command in the terminal:
+
+```
+jupyter_translate test_Notebook_en.ipynb --target pt
 ```
 A new file named `test_Notebook_en_pt.ipynb` will be created (or the code of the language you decided to use). There is also a script for automatically translating all .ipynb files in a folder and its subfolders. Additionally, you can use a version of the script that converts from/to any language, like:
 ```
-python jupyter_translate.py test_Notebook_pt.ipynb --source pt --target en
+jupyter_translate test_Notebook_pt.ipynb --source pt --target en
 ```
 The program translates markdown content, comments in code cells, and messages formatted in  `print(f" ... ")`. 
 
@@ -82,6 +92,16 @@ To set up a working Conda environment to use this tool, you must install a newer
 conda env create --file environment.yml
 conda activate jtranslate
 ```
+
+You can also reset the environment by running:
+```
+conda deactivate
+conda remove --name jtranslate --all
+conda env create -f environment.yml
+conda activate jtranslate
+```
+
+
 **Note:** Copy and execute each line one by one—do not run them as a block. **Caution:** The googletrans API, as used by deep-translator, may face connectivity issues if you're behind a firewall. To improve accessibility in such environments, consider using the --delay option to introduce a pause between retries.
 
 If you have any question or suggestion, use the *pull request* or discussion option in github.

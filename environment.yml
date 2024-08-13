@@ -3,14 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python
-  - tqdm
-  - deep-translator
-  - numpy
-  - scipy
-  - matplotlib
-  - jupyter
-  - fire
+  - python=3.9
   - pip
   - pip:
-    - googletrans==3.1.0a0
+    - -e . # Install the package in editable mode
