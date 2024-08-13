@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
     name="jupyter-translate",
@@ -7,8 +7,8 @@ setup(
     description="A Python script for translating Jupyter notebook files.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/WittmannF/jupyter-translate",  # Replace with your GitHub repo
-    packages=find_packages(),
+    url="https://github.com/WittmannF/jupyter-translate",
+    py_modules=["jupyter_translate"],  # Instead of packages=find_packages()
     include_package_data=True,
     install_requires=open('requirements.txt').read().splitlines(),
     entry_points={
@@ -18,8 +18,8 @@ setup(
     },
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",  # Or your license
+        "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.7',  # Specify the minimum Python version required
+    python_requires='>=3.7',
 )
