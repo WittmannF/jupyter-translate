@@ -4,6 +4,8 @@ channels:
   - defaults
 dependencies:
   - python
+  - tqdm
+  - deep-translator
   - numpy
   - scipy
   - matplotlib

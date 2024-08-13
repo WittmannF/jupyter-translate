@@ -1,2 +1,4 @@
 fire
+deep-translator
 googletrans
+tqdm
