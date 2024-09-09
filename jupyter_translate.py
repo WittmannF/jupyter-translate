@@ -5,6 +5,7 @@ History:
 - 09 Aug 2024: Added error handling for missing required parameters (--source and --target).
 - 12 Aug 2024: modified version to have default --source as en, and introduce "attempts" with sleep (default delay is 15 sec), to prevent overflow of the deep-translator API
 - 12 Aug 2024: Added option for different translators using --translator and print the default (googletrans)
+- 09 Sep 2024: Fixed an error that occurs when trying to translate a line that does not contain alphabetic characters. For example, "|---|---|"
 """
 import json, os, re, sys
 import argparse
@@ -24,7 +25,7 @@ def get_translator(translator_name, src_language, dest_language):
     TranslatorClass = translators.get(translator_name.lower())
     if not TranslatorClass:
         raise ValueError(f"Translator {translator_name} not supported.")
-    
+
     try:
         print(f"Using translator: {translator_name.capitalize()}")
         return TranslatorClass(source=src_language, target=dest_language)
@@ -50,7 +51,7 @@ def translate_markdown(text, translator, delay):
     # Regex expressions
     MD_CODE_REGEX = r'```[a-z]*\n[\s\S]*?\n```'
     CODE_REPLACEMENT_KW = r'xx_markdown_code_xx'
-    
+
     MD_LINK_REGEX = r'\[[^)]+\)'
     LINK_REPLACEMENT_KW = 'xx_markdown_link_xx'
 
@@ -58,6 +59,12 @@ def translate_markdown(text, translator, delay):
     END_LINE = '\n'
     IMG_PREFIX = '!['
     HEADERS = ['### ', '###', '## ', '##', '# ', '#']  # Should be from this order (bigger to smaller)
+
+    # Inner function to check whether a text contains alphabetic characters
+    def is_text_contains_alphabetic_characters(text):
+        pattern = r"[^\W_]"
+        result = re.search(pattern, text)
+        return result is not None
 
     # Inner function to replace tags from text from a source list
     def replace_from_list(tag, text, replacement_list):
@@ -67,6 +74,9 @@ def translate_markdown(text, translator, delay):
 
     # Inner function for translation
     def translate(text):
+        if not is_text_contains_alphabetic_characters(text):
+            return text
+
         # Get all markdown links
         md_links = re.findall(MD_LINK_REGEX, text)
 
