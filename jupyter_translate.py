@@ -271,16 +271,75 @@ def jupyter_translate(fname, src_language, dest_language, delay, translator_name
             json.dump(data_translated, f, ensure_ascii=False, indent=2)
         print(f'The {dest_language} translation has been saved as {dest_fname}')
 
+def translate_directory(directory, src_language, dest_language, delay, translator_name, rename_source_file=False, print_translation=False, recursive=True):
+    """
+    Translates all Jupyter Notebooks in a directory.
+    
+    Args:
+        directory (str): Path to the directory containing the notebooks
+        src_language (str): Source language code
+        dest_language (str): Destination language code
+        delay (int): Delay between API calls to avoid rate limiting
+        translator_name (str): Name of the translator to use
+        rename_source_file (bool): Whether to rename the original file
+        print_translation (bool): Whether to print translations to console
+        recursive (bool): Whether to process subdirectories recursively
+    """
+    if not os.path.isdir(directory):
+        print(f"Error: {directory} is not a valid directory")
+        return
+
+    translated_files = 0
+    
+    # Walk through the directory and its subdirectories if recursive is True
+    if recursive:
+        for root, _, files in os.walk(directory):
+            for file in files:
+                if file.endswith('.ipynb'):
+                    notebook_path = os.path.join(root, file)
+                    print(f"\nTranslating {notebook_path}...")
+                    jupyter_translate(
+                        fname=notebook_path, 
+                        src_language=src_language,
+                        dest_language=dest_language,
+                        delay=delay,
+                        translator_name=translator_name,
+                        rename_source_file=rename_source_file,
+                        print_translation=print_translation
+                    )
+                    translated_files += 1
+    else:
+        # Process only files in the current directory
+        for file in os.listdir(directory):
+            if file.endswith('.ipynb'):
+                notebook_path = os.path.join(directory, file)
+                print(f"\nTranslating {notebook_path}...")
+                jupyter_translate(
+                    fname=notebook_path, 
+                    src_language=src_language,
+                    dest_language=dest_language,
+                    delay=delay,
+                    translator_name=translator_name,
+                    rename_source_file=rename_source_file,
+                    print_translation=print_translation
+                )
+                translated_files += 1
+    
+    print(f"\nTranslation complete! Translated {translated_files} notebook{'s' if translated_files != 1 else ''}.")
+
 # Main function to parse arguments and run the translation
 def main():
     parser = argparse.ArgumentParser(description="Translate a Jupyter Notebook from one language to another.")
-    parser.add_argument('fname', help="Path to the Jupyter Notebook file")
+    parser.add_argument('fname', help="Path to the Jupyter Notebook file or directory containing notebooks")
     parser.add_argument('--source', default='auto', help="Source language code (default: auto-detect)")
     parser.add_argument('--target', required=True, help="Destination language code")
     parser.add_argument('--delay', type=int, default=10, help="Delay between retries in seconds (default: 10)")
     parser.add_argument('--translator', default='google', help="Translator to use (options: google or mymemory). Default: google")
     parser.add_argument('--rename', action='store_true', help="Rename the original file after translation")
     parser.add_argument('--print', dest='print_translation', action='store_true', help="Print translations to console")
+    parser.add_argument('--directory', action='store_true', help="Process all .ipynb files in the specified directory")
+    parser.add_argument('--no-recursive', dest='recursive', action='store_false', help="Don't process subdirectories when using --directory")
+    parser.set_defaults(recursive=True)
 
     args = parser.parse_args()
 
@@ -311,15 +370,28 @@ def main():
 
     print(f"Using source language code: {src_language}, target language code: {dest_language}")
 
-    jupyter_translate(
-        fname=args.fname,
-        src_language=src_language,
-        dest_language=dest_language,
-        delay=args.delay,
-        translator_name=args.translator,
-        rename_source_file=args.rename,
-        print_translation=args.print_translation
-    )
+    # Check if we're processing a directory or a single file
+    if args.directory or os.path.isdir(args.fname):
+        translate_directory(
+            directory=args.fname,
+            src_language=src_language,
+            dest_language=dest_language,
+            delay=args.delay,
+            translator_name=args.translator,
+            rename_source_file=args.rename,
+            print_translation=args.print_translation,
+            recursive=args.recursive
+        )
+    else:
+        jupyter_translate(
+            fname=args.fname,
+            src_language=src_language,
+            dest_language=dest_language,
+            delay=args.delay,
+            translator_name=args.translator,
+            rename_source_file=args.rename,
+            print_translation=args.print_translation
+        )
 
 if __name__ == '__main__':
     main()

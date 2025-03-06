@@ -43,3 +43,9 @@ jobs:
       run: jupyter_translate tests/data/test_Notebook_en.ipynb --target pt
     - name: Test PT to EN CLI Command
       run: jupyter_translate tests/data/test_Notebook_pt.ipynb --source pt --target en
+    - name: Test Directory Translation (with --directory flag)
+      run: jupyter_translate tests/data --target fr --directory
+    - name: Test Directory Translation (auto-detect directory)
+      run: jupyter_translate tests/data --target de
+    - name: Test Directory Translation (non-recursive)
+      run: jupyter_translate tests/data --target es --directory --no-recursive
