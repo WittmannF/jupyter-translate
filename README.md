@@ -10,11 +10,11 @@ pip install jupyter_translate
 After installed, you can use it but running the following command in the terminal:
 
 ```
-jupyter_translate test_Notebook_en.ipynb --target pt
+jupyter_translate tests/data/test_Notebook_en.ipynb --target pt
 ```
 A new file named `test_Notebook_en_pt.ipynb` will be created (or the code of the language you decided to use). There is also a script for automatically translating all .ipynb files in a folder and its subfolders. Additionally, you can use a version of the script that converts from/to any language, like:
 ```
-jupyter_translate test_Notebook_pt.ipynb --source pt --target en
+jupyter_translate tests/data/test_Notebook_pt.ipynb --source pt --target en
 ```
 The program translates markdown content, comments in code cells, and messages formatted in  `print(f" ... ")`. 
 

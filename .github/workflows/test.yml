@@ -40,6 +40,6 @@ jobs:
       run: |
         pytest tests/test_integration.py -v
     - name: Test EN to PT CLI Command
-      run: jupyter_translate test_Notebook_en.ipynb --target pt
+      run: jupyter_translate tests/data/test_Notebook_en.ipynb --target pt
     - name: Test PT to EN CLI Command
-      run: jupyter_translate test_Notebook_pt.ipynb --source pt --target en
+      run: jupyter_translate tests/data/test_Notebook_pt.ipynb --source pt --target en
