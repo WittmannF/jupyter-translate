@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="jupyter-translate",
-    version="2025.0.1",
+    version="2025.1.1",
     author="Fernando Marcos Wittmann & Andre Belem",
     description="A Python script for translating Jupyter notebook files.",
     long_description=open("README.md").read(),
