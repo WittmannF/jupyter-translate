@@ -1,11 +1,3 @@
-"""
-History:
-- 08 Aug 2024: Introduced argparse for handling command-line arguments, including options for specifying input (--source) and output (--target) languages, as well as the file path.
-- 09 Aug 2024: Transitioned from googletrans to deep-translator for improved translation stability and compatibility.
-- 09 Aug 2024: Added error handling for missing required parameters (--source and --target).
-- 12 Aug 2024: modified version to have default --source as en, and introduce "attempts" with sleep (default delay is 15 sec), to prevent overflow of the deep-translator API
-- 12 Aug 2024: Added option for different translators using --translator and print the default (googletrans)
-"""
 import json, os, re, sys
 import argparse
 from deep_translator import (
@@ -27,31 +19,57 @@ def get_translator(translator_name, src_language, dest_language):
     
     try:
         print(f"Using translator: {translator_name.capitalize()}")
+        print(f"Source language: {src_language}, Target language: {dest_language}")
+        
+        # Get supported languages
+        supported_languages = TranslatorClass().get_supported_languages(as_dict=True)
+        
+        # Check if source and target languages are supported
+        if src_language not in supported_languages.values():
+            print(f"Warning: Source language '{src_language}' might not be supported. Available languages:")
+            for code, lang in supported_languages.items():
+                if src_language.lower() in lang.lower():
+                    print(f"  - Did you mean '{lang}' (code: {code})?")
+        
+        if dest_language not in supported_languages.values():
+            print(f"Warning: Target language '{dest_language}' might not be supported. Available languages:")
+            for code, lang in supported_languages.items():
+                if dest_language.lower() in lang.lower():
+                    print(f"  - Did you mean '{lang}' (code: {code})?")
+        
+        # Initialize translator with source and target languages
         return TranslatorClass(source=src_language, target=dest_language)
+        
     except Exception as e:
         if 'No support for the provided language' in str(e):
-            print(f"Erro: {e}")
+            print(f"Error: {e}")
             supported_languages = TranslatorClass().get_supported_languages(as_dict=True)
-            print(f"Supported languages {translator_name}: {supported_languages}")
+            print(f"Supported languages for {translator_name}: {supported_languages}")
         else:
             print(f"Error initializing the translator: {e}")
         sys.exit(1)
 
 def safe_translate(translator, text, retries=3, delay=10):
+    if not text.strip():  # Skip empty texts
+        return text
+        
+    print(f"Translating text: {text[:30]}...")  # Debug: Show what we're translating
     for i in range(retries):
         try:
-            return translator.translate(text)
-        except Exception:
-            print(f"Error translating. Trying again ({i+1}/{retries})...")
+            translated = translator.translate(text)
+            print(f"Translation result: {translated[:30]}...")  # Debug: Show result
+            return translated
+        except Exception as e:
+            print(f"Error translating: {str(e)}. Trying again ({i+1}/{retries})...")
             sleep(delay)
-    raise Exception(f"Fail to translate after {retries} attempts.")
+    raise Exception(f"Failed to translate after {retries} attempts.")
 
 def translate_markdown(text, translator, delay):
     # Regex expressions
     MD_CODE_REGEX = r'```[a-z]*\n[\s\S]*?\n```'
     CODE_REPLACEMENT_KW = r'xx_markdown_code_xx'
     
-    MD_LINK_REGEX = r'\[[^)]+\)'
+    MD_LINK_REGEX = r'\[([^\]]+)\]\(([^)]+)\)'
     LINK_REPLACEMENT_KW = 'xx_markdown_link_xx'
 
     # Markdown tags
@@ -59,19 +77,35 @@ def translate_markdown(text, translator, delay):
     IMG_PREFIX = '!['
     HEADERS = ['### ', '###', '## ', '##', '# ', '#']  # Should be from this order (bigger to smaller)
 
+    print(f"Processing markdown text: {text[:30]}...")  # Debug
+
     # Inner function to replace tags from text from a source list
     def replace_from_list(tag, text, replacement_list):
-        list_to_gen = lambda: [(x) for x in replacement_list]
-        replacement_gen = list_to_gen()
-        return re.sub(tag, lambda x: next(iter(replacement_gen)), text)
+        if not replacement_list:
+            return text
+        replacement_list = list(replacement_list)  # Ensure it's a list
+        replacement_iter = iter(replacement_list)
+        
+        def replace_match(match):
+            nonlocal replacement_iter
+            try:
+                return next(replacement_iter)
+            except StopIteration:
+                # Reset iterator if we ran out of replacements
+                replacement_iter = iter(replacement_list)
+                return next(replacement_iter)
+                
+        return re.sub(tag, replace_match, text)
 
     # Inner function for translation
     def translate(text):
         # Get all markdown links
         md_links = re.findall(MD_LINK_REGEX, text)
+        print(f"Found {len(md_links)} markdown links")  # Debug
 
         # Get all markdown code blocks
         md_codes = re.findall(MD_CODE_REGEX, text)
+        print(f"Found {len(md_codes)} markdown code blocks")  # Debug
 
         # Replace markdown links in text to markdown_link
         text = re.sub(MD_LINK_REGEX, LINK_REPLACEMENT_KW, text)
@@ -79,14 +113,22 @@ def translate_markdown(text, translator, delay):
         # Replace links in markdown to tag markdown_link
         text = re.sub(MD_CODE_REGEX, CODE_REPLACEMENT_KW, text)
 
+        print(f"Text after replacements (before translation): {text[:50]}...")  # Debug
+
         # Translate text
         text = safe_translate(translator, text, delay=delay)
 
+        print(f"Text after translation: {text[:50]}...")  # Debug
+
         # Replace tags to original link tags
-        text = replace_from_list('[Xx]' + LINK_REPLACEMENT_KW[1:], text, md_links)
+        if md_links:
+            # Reconstruct the original markdown links
+            original_links = [f"[{title}]({url})" for title, url in md_links]
+            text = replace_from_list(LINK_REPLACEMENT_KW, text, original_links)
 
         # Replace code tags
-        text = replace_from_list('[Xx]' + CODE_REPLACEMENT_KW[1:], text, md_codes)
+        if md_codes:
+            text = replace_from_list(CODE_REPLACEMENT_KW, text, md_codes)
 
         return text
 
@@ -106,30 +148,45 @@ def translate_markdown(text, translator, delay):
     return translate(text)
 
 def translate_code_comments_and_prints(code, translator, delay):
+    if not code or code.isspace():
+        return code
+
+    def translate_text(text):
+        return safe_translate(translator, text, delay=delay)
+
+    # Split line by line to handle multi-line code
     lines = code.split('\n')
     translated_lines = []
+    
     for line in lines:
+        # Handle comments (# ... )
         if '#' in line:
-            # Split the line into code and comment parts
             code_part, comment_part = line.split('#', 1)
-            # Translate the comment part using safe_translate
-            translated_comment = safe_translate(translator, comment_part.strip(), delay=delay)
-            # Reconstruct the line with translated comment
-            translated_lines.append(f"{code_part}# {translated_comment}")
-        elif 'print(f"' in line or "print(f'" in line:
-            # Handle formatted print statements
-            print_match = re.search(r'print\((f?)(["\'])(.*?)(\2)\)', line)
-            if print_match:
-                print_part = print_match.group(1)
-                text_part = print_match.group(3)
-                # Translate only the text within the formatted print statement
-                translated_text = safe_translate(translator, text_part, delay=delay)
-                # Reconstruct the line with translated text
-                translated_lines.append(f'print({print_part}"{translated_text}")')
-            else:
-                translated_lines.append(line)  # If it doesn't match, keep the line as is
-        else:
-            translated_lines.append(line)
+            translated_comment = translate_text(comment_part.strip())
+            translated_line = f"{code_part}# {translated_comment}"
+            translated_lines.append(translated_line)
+            continue
+            
+        # Skip f-string print statements entirely to preserve variable references
+        if 'print(f' in line:
+            translated_lines.append(line)  # Keep f-string prints unchanged
+            continue
+            
+        # Handle regular print statements
+        if 'print(' in line and ('f"' not in line and "f'" not in line):
+            # Try to match regular print statements
+            match = re.search(r'print\(\s*["\'](.+?)["\']\s*(?:,.*?)?\)', line)
+            if match:
+                text_to_translate = match.group(1)
+                translated_text = translate_text(text_to_translate)
+                # Replace the original text with translated text
+                translated_line = line.replace(text_to_translate, translated_text)
+                translated_lines.append(translated_line)
+                continue
+        
+        # If none of the above conditions match, keep the line as is
+        translated_lines.append(line)
+    
     return '\n'.join(translated_lines)
 
 def jupyter_translate(fname, src_language, dest_language, delay, translator_name, rename_source_file=False, print_translation=False):
@@ -139,6 +196,16 @@ def jupyter_translate(fname, src_language, dest_language, delay, translator_name
 
     # Initialize the translator
     translator = get_translator(translator_name, src_language, dest_language)
+    
+    # Test the translator with a simple text
+    test_text = "Teste de tradução. Isso deve ser traduzido."
+    try:
+        test_result = translator.translate(test_text)
+        print(f"Translator test - Original: '{test_text}' → Translated: '{test_result}'")
+    except Exception as e:
+        print(f"Translator test failed: {str(e)}")
+        print("The translator is not working correctly. Please check your settings and try again.")
+        sys.exit(1)
 
     # Check if the necessary parameters are provided
     if not fname or not dest_language:
@@ -158,25 +225,36 @@ def jupyter_translate(fname, src_language, dest_language, delay, translator_name
     print(f"Code cells: {code_cells}")
     print(f"Markdown cells: {markdown_cells}")
 
-    skip_row = False
+    # Translate each cell
     for i, cell in enumerate(tqdm(data_translated['cells'], desc="Translating cells", unit="cell")):
-        for j, source in enumerate(cell['source']):
-            if cell['cell_type'] == 'markdown':
-                if source[:3] == '```':
-                    skip_row = not skip_row  # Invert flag until the next code block
-
-                if not skip_row:
-                    if source not in ['```\n', '```', '\n'] and source[:4] != '<img':  # Don't translate because of:
-                        # 1. ``` -> ëëë 2. '\n' disappeared 3. image links damaged
-                        data_translated['cells'][i]['source'][j] = \
-                            translate_markdown(source, translator, delay=delay)
-            elif cell['cell_type'] == 'code':
-                # Translate comments and formatted print statements within code cells
-                data_translated['cells'][i]['source'][j] = \
-                    translate_code_comments_and_prints(source, translator, delay=delay)
-
+        if cell['cell_type'] == 'markdown':
+            # For markdown cells, we need to handle special markdown syntax
+            # Join all source lines into a single string for better translation
+            full_markdown = ''.join(cell['source'])
+            
+            # Translate the whole markdown content
+            translated_markdown = translate_markdown(full_markdown, translator, delay=delay)
+            
+            # Split the translated content back into lines
+            data_translated['cells'][i]['source'] = translated_markdown.splitlines(True)  # keepends=True to preserve newlines
+            
             if print_translation:
-                print(data_translated['cells'][i]['source'][j])
+                print(f"Translated markdown cell {i}:")
+                print(''.join(data_translated['cells'][i]['source']))
+                
+        elif cell['cell_type'] == 'code':
+            # For code cells, translate comments and print statements
+            translated_source = []
+            for source_line in cell['source']:
+                # Translate comments and formatted print statements within code
+                translated_line = translate_code_comments_and_prints(source_line, translator, delay=delay)
+                translated_source.append(translated_line)
+                
+            data_translated['cells'][i]['source'] = translated_source
+            
+            if print_translation:
+                print(f"Translated code cell {i}:")
+                print(''.join(data_translated['cells'][i]['source']))
 
     if rename_source_file:
         fname_bk = f"{'.'.join(fname.split('.')[:-1])}_bk.ipynb"  # index.ipynb -> index_bk.ipynb
@@ -197,7 +275,7 @@ def jupyter_translate(fname, src_language, dest_language, delay, translator_name
 def main():
     parser = argparse.ArgumentParser(description="Translate a Jupyter Notebook from one language to another.")
     parser.add_argument('fname', help="Path to the Jupyter Notebook file")
-    parser.add_argument('--source', default='en', help="Source language code (default: en)")
+    parser.add_argument('--source', default='auto', help="Source language code (default: auto-detect)")
     parser.add_argument('--target', required=True, help="Destination language code")
     parser.add_argument('--delay', type=int, default=10, help="Delay between retries in seconds (default: 10)")
     parser.add_argument('--translator', default='google', help="Translator to use (options: google or mymemory). Default: google")
@@ -206,10 +284,37 @@ def main():
 
     args = parser.parse_args()
 
+    # Map common language names to ISO codes if full names are provided
+    language_map = {
+        'english': 'en',
+        'portuguese': 'pt',
+        'spanish': 'es',
+        'french': 'fr',
+        'german': 'de',
+        'italian': 'it',
+        'dutch': 'nl',
+        'chinese': 'zh-CN',
+        'japanese': 'ja',
+        'korean': 'ko',
+        'russian': 'ru',
+        'arabic': 'ar'
+    }
+
+    # Convert source and target languages to ISO codes if they are full names
+    src_language = args.source.lower()
+    if src_language in language_map:
+        src_language = language_map[src_language]
+    
+    dest_language = args.target.lower()
+    if dest_language in language_map:
+        dest_language = language_map[dest_language]
+
+    print(f"Using source language code: {src_language}, target language code: {dest_language}")
+
     jupyter_translate(
         fname=args.fname,
-        src_language=args.source,
-        dest_language=args.target,
+        src_language=src_language,
+        dest_language=dest_language,
         delay=args.delay,
         translator_name=args.translator,
         rename_source_file=args.rename,
