@@ -10,17 +10,34 @@ pip install jupyter_translate
 After installed, you can use it but running the following command in the terminal:
 
 ```
-jupyter_translate test_Notebook_en.ipynb --target pt
+jupyter_translate tests/data/test_Notebook_en.ipynb --target pt
 ```
-A new file named `test_Notebook_en_pt.ipynb` will be created (or the code of the language you decided to use). There is also a script for automatically translating all .ipynb files in a folder and its subfolders. Additionally, you can use a version of the script that converts from/to any language, like:
+A new file named `test_Notebook_en_pt.ipynb` will be created (or the code of the language you decided to use). 
+
+### Translate Multiple Notebooks in a Directory
+
+You can translate all notebooks in a directory by using the `--directory` flag or by simply providing a directory path:
+
 ```
-jupyter_translate test_Notebook_pt.ipynb --source pt --target en
+jupyter_translate tests/data --target es --directory
 ```
+
+By default, this will recursively traverse all subdirectories. If you want to translate only the notebooks in the specified directory (without subdirectories), add the `--no-recursive` flag:
+
+```
+jupyter_translate tests/data --target es --directory --no-recursive
+```
+
+You can also translate notebooks from/to any language:
+```
+jupyter_translate tests/data/test_Notebook_pt.ipynb --source pt --target en
+```
+
 The program translates markdown content, comments in code cells, and messages formatted in  `print(f" ... ")`. 
 
 ## Translator Options:
 
-By default, jupyter-translate uses [googletrans](https://py-googletrans.readthedocs.io/en/latest/) on its backend. However, you can specify a different translator using the --translator option. Here’s how to use it:
+By default, jupyter-translate uses [googletrans](https://py-googletrans.readthedocs.io/en/latest/) on its backend. However, you can specify a different translator using the --translator option. Here's how to use it:
 
 ```
 jupyter_translate test_Notebook_en.ipynb --target pt --translator='mymemory'
@@ -74,10 +91,23 @@ If specified, this option will rename the original notebook file after the trans
 ```
 jupyter_translate my_notebook.ipynb --target es --rename
 ```
+
 `--print`:<br>
 Use this option if you want to print the translations directly to the console as they happen.
 ```
 jupyter_translate my_notebook.ipynb --target es --print
+```
+
+`--directory`:<br>
+Process all .ipynb files in the specified directory. This can be used with a directory path to translate all notebooks in that location.
+```
+jupyter_translate notebooks_dir/ --target es --directory
+```
+
+`--no-recursive`:<br>
+When used with `--directory`, this flag prevents subdirectories from being processed. Only notebooks in the specified directory will be translated.
+```
+jupyter_translate notebooks_dir/ --target es --directory --no-recursive
 ```
 
 ## Implementation notes:

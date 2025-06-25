@@ -1,6 +1,10 @@
 name: Test Jupyter Translate
 
 on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
   pull_request:
     branches:
       - master
@@ -14,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.8, 3.9]
+        python-version: [3.11, 3.12]
 
     steps:
     - uses: actions/checkout@v2
@@ -26,9 +30,22 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+        pip install pytest pytest-cov
     - name: Install the package
       run: pip install -e .
+    - name: Run unit tests
+      run: |
+        pytest tests/test_unit.py -v
+    - name: Run integration tests
+      run: |
+        pytest tests/test_integration.py -v
     - name: Test EN to PT CLI Command
-      run: jupyter_translate test_Notebook_en.ipynb --target pt
+      run: jupyter_translate tests/data/test_Notebook_en.ipynb --target pt
     - name: Test PT to EN CLI Command
-      run: jupyter_translate test_Notebook_pt.ipynb --source pt --target en
+      run: jupyter_translate tests/data/test_Notebook_pt.ipynb --source pt --target en
+    - name: Test Directory Translation (with --directory flag)
+      run: jupyter_translate tests/data --target fr --directory
+    - name: Test Directory Translation (auto-detect directory)
+      run: jupyter_translate tests/data --target de
+    - name: Test Directory Translation (non-recursive)
+      run: jupyter_translate tests/data --target es --directory --no-recursive
